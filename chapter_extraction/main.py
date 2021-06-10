@@ -1,3 +1,6 @@
+# python main.py --fileDir  /Users/ruiliu/Desktop/test_eng  --out_path  /Users/ruiliu/Desktop/out \
+# --chapter_num  21  --combine  False  --language  English
+
 import argparse
 import os
 
