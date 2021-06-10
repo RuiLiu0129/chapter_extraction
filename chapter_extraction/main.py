@@ -3,8 +3,9 @@
 
 import argparse
 import os
+import traceback
 
-from chapter_extraction.utils import filesToSoup, get_soup_dictionary, match_soup, get_part_soup, get_chapters_html
+from utils import filesToSoup, get_soup_dictionary, match_soup, get_part_soup, get_chapters_html
 
 
 def convert(file, out_path, language="Chinese", chapter_num=24, chapters=None, combine=True):
@@ -73,5 +74,9 @@ if __name__ == "__main__":
     files = os.listdir(file_dir)
     for file in files:
         filepath = os.path.join(file_dir, file)
-        convert(filepath, out_path, language, chapter_num, chapters, combine)
-        print("[INFO] Finish ", file)
+        try:
+            convert(filepath, out_path, language, chapter_num, chapters, combine)
+            print("[INFO] Finish ", file)
+        except Exception as e:
+            print("[ERROR]", file, e)
+            print(traceback.print_exc())

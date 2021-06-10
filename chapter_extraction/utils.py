@@ -10,8 +10,8 @@ import numpy as np
 
 from bs4 import BeautifulSoup
 
-from chapter_extraction.similarity.weighted_levenshtein import WeightedLevenshtein
-from chapter_extraction.similarity.weighted_levenshtein_test import CharSub
+from similarity.weighted_levenshtein import WeightedLevenshtein
+from similarity.weighted_levenshtein_test import CharSub
 
 
 def check_bad_char(char):
@@ -407,8 +407,3 @@ def get_part_soup(soup, dic, li):
 
     for index in range(li[-1], len(para)):
         para[index]['chapter'] = dic[-1]
-
-
-
-if __name__ == "__main__":
-    docxTosoup("/Users/ruiliu/Desktop/2019年度系统运维和技术支持驻场服务合同.docx", "./")
