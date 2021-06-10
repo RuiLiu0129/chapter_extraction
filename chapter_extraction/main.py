@@ -3,6 +3,7 @@ import os
 
 from chapter_extraction.utils import filesToSoup, get_soup_dictionary, match_soup, get_part_soup, get_chapters_html
 
+
 def convert(file, out_path, language="Chinese", chapter_num=24, chapters=None, combine=True):
     """
     To convert file into chapters using menu
@@ -55,7 +56,8 @@ if __name__ == "__main__":
     parser.add_argument("--chapter_num", type=int, help="number of chapters to extract", required=True)
     parser.add_argument("--language", type=str, help="file langusge", required=True, default="Chinese")
     parser.add_argument("--chapters", type=str, help="chapter information", required=False, default=None)
-    parser.add_argument("--combine", type=bool, help="combine target chapters into one html", required=False, default=True)
+    parser.add_argument("--combine", type=bool, help="combine target chapters into one html", required=False,
+                        default=True)
     args = parser.parse_args()
 
     file_dir = args.fileDir
@@ -70,8 +72,3 @@ if __name__ == "__main__":
         filepath = os.path.join(file_dir, file)
         convert(filepath, out_path, language, chapter_num, chapters, combine)
         print("[INFO] Finish ", file)
-
-
-
-
-
