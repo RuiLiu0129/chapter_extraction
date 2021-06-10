@@ -203,7 +203,8 @@ def pdfTosoup(filePath, output_dir_parent, timeout=None):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
     outhtml = os.path.join(output_dir, output_file)
-    os.system('unoconv -f pdf -o' + " " + outhtml + " " + filePath)
+    print(outhtml)
+    os.system('unoconv -f html -o' + " " + outhtml + " " + filePath)
     with open(outhtml, 'r') as temp:
         html = temp.read()
         temp.close()
@@ -225,6 +226,7 @@ def filesToSoup(filePath, output_dir_parent):
 
     filename = ntpath.basename(filePath)
     type = filename.split(".")[-1]
+    print(type)
     if type == "docx" or type == "doc":
         soup = docxTosoup(filePath, output_dir_parent)
         return soup

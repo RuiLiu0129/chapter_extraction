@@ -24,20 +24,27 @@ def convert(file, out_path, chapter_num=24, chapters=None, combine=True):
 
     get_part_soup(soup, dic, li)
 
-    if len(chapters) > 0:
+    if chapters is not None:
         get_chapters_html(soup, dic, chapters, combine, out_path)
 
-    if combine:
+    if not combine:
         with open(os.path.join(out_path, (filename + ".html")), "w") as temp:
             temp.write(str(soup))
             temp.close()
     else:
         for chapter in dic:
-            para = [p for p in soup.find_all() if p.name in ['img', 'table', 'p']]
-            out_file = os.path.join(out_path, (filename + "_" + chapter + ".html"), "w")
+            para = [p for p in soup.find_all() if p.name in ['table', 'p']]
+            out_file = os.path.join(out_path, (filename + "_" + chapter + ".html"))
             with open(out_file, "w") as temp:
                 target = [p for p in para if p["chapter"] == chapter]
-                temp.write("".join(target))
+                for p in target:
+                    lines = [line for line in p.find_all() if line.name in ['line']]
+                    for line in lines:
+                        del line['style']
+
+                    del p['style']
+                target = [str(p) for p in target]
+                temp.write(''.join(target))
                 temp.close()
 
 
@@ -59,7 +66,7 @@ if __name__ == "__main__":
     files = os.listdir(file_dir)
     for file in files:
         filepath = os.path.join(file_dir, file)
-        convert(file, out_path, chapter_num, chapters, combine)
+        convert(filepath, out_path, chapter_num, chapters, combine)
         print("[INFO] Finish ", file)
 
 
