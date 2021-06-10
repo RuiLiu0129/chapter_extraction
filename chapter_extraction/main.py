@@ -7,6 +7,9 @@ import traceback
 
 from utils import filesToSoup, get_soup_dictionary, match_soup, get_part_soup, get_chapters_html
 
+def Diff(li1, li2):
+    li_dif = [i for i in li1 + li2 if i not in li1 or i not in li2]
+    return li_dif
 
 def convert(file, out_path, language="Chinese", chapter_num=24, chapters=None, combine=True):
     """
@@ -23,7 +26,6 @@ def convert(file, out_path, language="Chinese", chapter_num=24, chapters=None, c
 
     # get dictionary from soup
     file_dictionary, para_id = get_soup_dictionary(soup, chapter_num, language)
-    # print(file_dictionary)
 
     dic, li = match_soup(para_id, file_dictionary, soup, language)
 

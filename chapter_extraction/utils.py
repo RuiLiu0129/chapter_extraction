@@ -322,13 +322,19 @@ def get_soup_dictionary(soup, chapter_num, language):
             new_text = get_title(text)
             if new_text == ['']:
                 continue
+            elif para[k].get_text().endswith("Activity"):
+                continue
+            elif not para[k].get_text()[-1] in ['0','1','2','3','4','5','6','7','8','9']:
+                num +=1
+                break
             else:
                 file_dictionary += new_text
             num += 1
-            if num > chapter_num:
-                num += 1
-                break
-    return file_dictionary, k + 1
+            # if num > chapter_num:
+            #     num += 1
+            #     break
+
+    return file_dictionary, k
 
 
 def match_dic_soup(file_dictionary, p, language):
