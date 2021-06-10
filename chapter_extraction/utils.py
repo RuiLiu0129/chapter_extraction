@@ -120,13 +120,20 @@ def detect_pdf_type(pdf_path, max_images=1000):
     return (float(flag) / doc.pageCount) < 0.5
 
 
-def title_tokenizer(text):
-    # 只保留中文字符
-    if "<p>" in text or "<line>" in text:
-        inner_text = BeautifulSoup(text).getText()
-        result = re.findall(r'[\u4e00-\u9fa5]', str(inner_text))
-    else:
-        result = re.findall(r'[\u4e00-\u9fa5]', str(text))
+def title_tokenizer(text, language):
+    if language == "Chinese":
+        # 只保留中文字符
+        if "<p>" in text or "<line>" in text:
+            inner_text = BeautifulSoup(text).getText()
+            result = re.findall(r'[\u4e00-\u9fa5]', str(inner_text))
+        else:
+            result = re.findall(r'[\u4e00-\u9fa5]', str(text))
+    elif language == "English":
+        if "<p>" in text or "<line>" in text:
+            inner_text = BeautifulSoup(text).getText()
+            result = re.findall(r'[a-z]|[A-Z]', str(inner_text))
+        else:
+            result = re.findall(r'[a-z]|[A-Z]', str(text))
     result = "".join(result)
     result = result.replace("和", "")
     result = result.replace("与", "")
@@ -244,32 +251,47 @@ def filesToSoup(filePath, output_dir_parent):
 
 
 # tokeinze text, only keep chinese character
-def chinese_tokenizer(text):
-    # 只保留中文字符
-    if "<p>" in text or "<line>" in text:
-        inner_text = BeautifulSoup(text).getText()
-        result = re.findall(r'[\u4e00-\u9fa5]', str(inner_text))
-    else:
-        result = re.findall(r'[\u4e00-\u9fa5]', str(text))
+def content_tokenizer(text, language):
+
+    if language == "Chinese":
+        # 只保留中文字符
+        if "<p>" in text or "<line>" in text:
+            inner_text = BeautifulSoup(text).getText()
+            result = re.findall(r'[\u4e00-\u9fa5]', str(inner_text))
+        else:
+            result = re.findall(r'[\u4e00-\u9fa5]', str(text))
+    if language == "English":
+        if "<p>" in text or "<line>" in text:
+            inner_text = BeautifulSoup(text).getText()
+            result = re.findall(r'[a-z]|[A-Z]', str(inner_text))
+        else:
+            result = re.findall(r'[a-z]|[A-Z]', str(text))
     result = "".join(result)
     return result
 
 
-def find_soup_menu(para):
+def find_soup_menu(para, language):
     for index in range(len(para)):
         text = para[index].get_text()
-        text = chinese_tokenizer(text)
-        if "目" == text:
-            for j in range(index, min(index + 10, len(para))):
-                next_text = chinese_tokenizer(para[j].get_text())
-                if next_text == "":
-                    continue
-                elif next_text == "录":
-                    return para[j]['p_id']
-        elif "目录" in text:
-            return index
-        elif index == len(para) - 1:
-            raise ValueError("您选择了错误的模版，请使用通用文本进行解析！")
+        text = content_tokenizer(text, language)
+        if language == "Chinese":
+            if "目" == text:
+                for j in range(index, min(index + 10, len(para))):
+                    next_text = content_tokenizer(para[j].get_text(), language)
+                    if next_text == "":
+                        continue
+                    elif next_text == "录":
+                        return para[j]['p_id']
+            elif "目录" in text:
+                return index
+            elif index == len(para) - 1:
+                raise ValueError("您选择了错误的模版，请使用通用文本进行解析！")
+        elif language == "English":
+            if "contents" in text.lower():
+                return index
+            elif index == len(para) - 1:
+                raise ValueError("Wrong template！")
+
 
 
 def get_title(text):
@@ -288,13 +310,13 @@ def get_title(text):
         return [tmp]
 
 
-def get_soup_dictionary(soup, chapter_num):
+def get_soup_dictionary(soup, chapter_num, language):
     file_dictionary = []
     num = 0
     para = [p for p in soup.find_all() if p.name in ['img', 'table', 'p']]
-    x = find_soup_menu(para)
+    x = find_soup_menu(para, language)
     for k in range(x + 1, len(para)):
-        text = chinese_tokenizer(para[k].get_text())
+        text = content_tokenizer(para[k].get_text(), language)
         para[k]['chapter'] = 'cover'
         if text != "" and "\x0c" not in text:
             new_text = get_title(text)
@@ -309,11 +331,11 @@ def get_soup_dictionary(soup, chapter_num):
     return file_dictionary, k + 1
 
 
-def match_dic_soup(file_dictionary, p):
+def match_dic_soup(file_dictionary, p, language):
     match = None
     a = WeightedLevenshtein(character_substitution=CharSub())
     original_sentence = p.get_text()
-    sentence = chinese_tokenizer(original_sentence)
+    sentence = content_tokenizer(original_sentence, language)
     new_text = "".join(get_title(sentence))
 
     for i in range(0, len(file_dictionary)):
@@ -356,13 +378,13 @@ def delete_duplicate(dic, li):
     return new_dic, new_li
 
 
-def match_soup(para_id, file_dictionary, soup):
+def match_soup(para_id, file_dictionary, soup, language):
     dic = []
     li = []
     para = [p for p in soup.find_all() if p.name in ['img', 'table', 'p']]
     for i in range(para_id, len(para)):
         if len(file_dictionary) > 0:
-            result, file_dictionary = match_dic_soup(file_dictionary, para[i])
+            result, file_dictionary = match_dic_soup(file_dictionary, para[i], language)
             if result != None:
                 dic.append(result)
                 li.append(i)
